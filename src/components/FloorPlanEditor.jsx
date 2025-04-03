@@ -30,6 +30,7 @@ const FloorPlanEditor = () => {
         >
           <GeoJSONWithSelection 
             data={floorPlan} 
+            setData={setFloorPlan}
             selectedFeature={selectedFeature} 
             setSelectedFeature={setSelectedFeature} 
           />

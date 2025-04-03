@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 
-const GeoJSONWithSelection = ({ data, selectedFeature, setSelectedFeature }) => {
+const GeoJSONWithSelection = ({ data, setData, selectedFeature, setSelectedFeature }) => {
   const map = useMap();  
+  const [undoStack, setUndoStack] = useState([]);
+  const [redoStack, setRedoStack] = useState([]);
   const [layerMap, setLayerMap] = useState(new Map());
 
   useEffect(() => {
@@ -19,7 +21,7 @@ const GeoJSONWithSelection = ({ data, selectedFeature, setSelectedFeature }) => 
         layer.on("click", () => {
           setSelectedFeature(feature); // Store selected feature
         });
-        layerMap.set(feature, layer);
+        layerMap.set(feature.properties.id, layer);
       },
     });
 
@@ -31,23 +33,37 @@ const GeoJSONWithSelection = ({ data, selectedFeature, setSelectedFeature }) => 
   }, [data, map, selectedFeature, setSelectedFeature]);
 
   useEffect(() => {
-    if (!selectedFeature || !layerMap.has(selectedFeature)) return;
+    if (!selectedFeature || !layerMap.has(selectedFeature.properties.id)) return;
   
-    const layer = layerMap.get(selectedFeature);
+    const layer = layerMap.get(selectedFeature.properties.id);
     layer.enableEdit(); // Enables editing on the selected shape
   
-    layer.on("editable:dragend", (e) => {
-      console.log("New position:", e.layer.toGeoJSON());
+    layer.on("editable:vertex:dragend", () => {
+      const updatedFeature = layer.toGeoJSON();
+      console.log("Shape modified:", updatedFeature);
+
+      // Update the selected feature
+      setSelectedFeature(updatedFeature);
+
+      // Update the data prop with the modified feature
+      setData((prevData) => ({
+        ...prevData,
+        features: prevData.features.map((feature) =>
+          feature.properties.id === updatedFeature.properties.id ? updatedFeature : feature
+        ),
+      }));
+      saveState(updatedFeature);
     });
-  
-    layer.on("editable:vertex:dragend", (e) => {
-      console.log("Shape modified:", e.layer.toGeoJSON());
-    });
+
+    const saveState = (updatedFeature) => {
+        setUndoStack(prev => [...prev, updatedFeature]);
+        setRedoStack([]);
+    }
   
     return () => {
       layer.disableEdit();
     };
-  }, [selectedFeature]);
+  }, [selectedFeature, setData]);
   
 
   return null;
