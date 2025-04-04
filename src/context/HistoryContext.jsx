@@ -12,7 +12,7 @@ export const HistoryProvider = ({ children }) => {
   const [currentState, setCurrentState] = useState(null);
 
   const initializeState = (feature) => {
-    setUndoStack([feature]);
+    setUndoStack([feature.features]);
     setRedoStack([]);
   };
 
@@ -22,7 +22,7 @@ export const HistoryProvider = ({ children }) => {
   };
 
   const undo = () => {
-    if (undoStack.length === 0) return;
+    if (undoStack.length === 1) return;
     const lastState = undoStack.pop();
     setRedoStack((prev) => [...prev, lastState]);
     setCurrentState(undoStackPeek());
@@ -32,7 +32,7 @@ export const HistoryProvider = ({ children }) => {
     if (redoStack.length === 0) return;
     const lastRedo = redoStack.pop();
     setUndoStack((prev) => [...prev, lastRedo]);
-    setCurrentState(redoStackPeek());
+    setCurrentState(lastRedo);
   };
 
   const undoStackPeek = () => {
