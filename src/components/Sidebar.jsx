@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Button, Dropdown, OverlayTrigger, Tooltip, ButtonGroup, Alert } from 'react-bootstrap';
 import { Cursor, VectorPen, GeoAlt, Type, Trash, ArrowCounterclockwise, ArrowClockwise } from 'react-bootstrap-icons';
+import {useHistory} from "../context/HistoryContext";
+
 const FloorDropdown = () => {
   const [allFloors, setAllFloors] = useState([]);
   const [selectedFloor, setSelectedFloor] = useState(null);
@@ -38,6 +40,7 @@ const FloorDropdown = () => {
 )
 }
 const Sidebar = ({ setMode, editorPage}) => {
+  const {undo, redo} = useHistory();
   const tools = [
     { name: 'select', icon: <Cursor />, label: 'Select' },
     { name: 'drawPath', icon: <VectorPen />, label: 'Draw Path' },
@@ -49,20 +52,22 @@ const Sidebar = ({ setMode, editorPage}) => {
   ];
 
 const handleToolSelection = (event, toolName) => {
-    if (toolName === 'select') {
+    if (event === 'select') {
         this.prototype.handleSelect();
-    } else if (toolName === 'drawPath') {
+    } else if (event === 'drawPath') {
       console.log('Undo');
-    } else if (toolName === 'addPOI') {
+    } else if (event === 'addPOI') {
       console.log('Redo');
-    } else if (toolName === 'addText') {
+    } else if (event === 'addText') {
     console.log('Redo');
-  } else if (toolName === 'delete') {
+  } else if (event === 'delete') {
   console.log('Redo');
-} else if (toolName === 'undo') {
+} else if (event === 'undo') {
+  console.log('Undo');
+  undo();
+} else if (event === 'redo') {
   console.log('Redo');
-} else if (toolName === 'redo') {
-  console.log('Redo');
+  redo();
 } else {
       setMode(toolName);
     }
