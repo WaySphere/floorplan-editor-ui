@@ -65,17 +65,35 @@ const GeoJSONWithSelection = ({ data, setData, selectedFeature, setSelectedFeatu
   
   useEffect(() => {
     if (!currentState) return;
-    // data.forEach((feature) => {
-    //   const f = currentState.features.find((f) => f.properties.id === feature.properties.id);
-    //   feature.setGeolocations(f.geometry.coordinates);
-    // });
-    // setData(...currentState);
     setData(() => ({
       type: "FeatureCollection",
       features: currentState,
     }));
     // data.features = currentState;
   }, [currentState, setData]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Delete" || e.key === "Backspace") {
+        if (!selectedFeature) return;
+  
+        const updated = data.features.filter(
+          (f) => f.properties.id !== selectedFeature.properties.id
+        );
+  
+        setData({
+          type: "FeatureCollection",
+          features: updated,
+        });
+  
+        saveState(updated);
+        setSelectedFeature(null);
+      }
+    };
+  
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [data, selectedFeature, setData, saveState, setSelectedFeature]);
 
   return null;
 };
