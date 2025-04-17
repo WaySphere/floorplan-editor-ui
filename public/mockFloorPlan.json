@@ -7,7 +7,7 @@
           "type": "Polygon",
           "coordinates": [[[0, 0], [0, 50], [50, 50], [50, 0], [0, 0]]]
         },
-        "properties": { "name": "Room A", "type": "room", "color": "#FFDDC1" }
+        "properties": { "id":101, "name": "Room A", "type": "room", "color": "#FFDDC1" }
       },
       {
         "type": "Feature",
@@ -15,7 +15,7 @@
           "type": "Polygon",
           "coordinates": [[[60, 0], [60, 50], [110, 50], [110, 0], [60, 0]]]
         },
-        "properties": { "name": "Room B", "type": "room", "color": "#C1E1FF" }
+        "properties": { "id":102, "name": "Room B", "type": "room", "color": "#C1E1FF" }
       },
       {
         "type": "Feature",
@@ -23,7 +23,7 @@
           "type": "Polygon",
           "coordinates": [[[0, 60], [0, 80], [110, 80], [110, 60], [0, 60]]]
         },
-        "properties": { "name": "Corridor", "type": "corridor", "color": "#E8E8E8" }
+        "properties": { "id":103, "name": "Corridor", "type": "corridor", "color": "#E8E8E8" }
       },
       {
         "type": "Feature",
@@ -31,7 +31,7 @@
           "type": "Point",
           "coordinates": [10, 10]
         },
-        "properties": { "name": "Fire Extinguisher", "type": "poi", "icon": "🧯" }
+        "properties": { "id":104, "name": "Fire Extinguisher", "type": "poi", "icon": "🧯" }
       },
       {
         "type": "Feature",
@@ -39,7 +39,7 @@
           "type": "Point",
           "coordinates": [70, 10]
         },
-        "properties": { "name": "Emergency Exit", "type": "poi", "icon": "🚪" }
+        "properties": { "id":105, "name": "Emergency Exit", "type": "poi", "icon": "🚪" }
       }
     ]
   }

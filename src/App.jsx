@@ -2,11 +2,13 @@ import BottomPanel from "./components/BottomPanel";
 import FloorPlanEditor from "./components/FloorPlanEditor";
 import Sidebar from "./components/SideBar";
 import TopNavbar from "./components/TopNavBar";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import {HistoryProvider} from "./context/HistoryContext";
 
 export default function App() {
   const [mode, setMode] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
+  const editorRef = useRef();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', position: 'relative' }}>
@@ -17,10 +19,12 @@ export default function App() {
 
       {/* Middle Section */}
       <div style={{ display: 'flex', flexGrow: 1, position: 'relative', overflow: 'hidden' }}>
-        <Sidebar setMode={setMode} />
-        <div style={{ flexGrow: 1, position: 'relative' }}>
+        <HistoryProvider>
+        <Sidebar setMode={setMode} editorPage={editorRef}/>
+        <div ref={editorRef} style={{ flexGrow: 1, position: 'relative' }}>
           <FloorPlanEditor setSelectedItem={setSelectedItem} />
         </div>
+        </HistoryProvider>
       </div>
 
       {/* Bottom Panel - Fixed */}
