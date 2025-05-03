@@ -8,6 +8,7 @@ import {HistoryProvider} from "./context/HistoryContext";
 export default function App() {
   const [mode, setMode] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [deleteTrigger, setDeleteTrigger] = useState(false);
   const editorRef = useRef();
 
   return (
@@ -20,9 +21,9 @@ export default function App() {
       {/* Middle Section */}
       <div style={{ display: 'flex', flexGrow: 1, position: 'relative', overflow: 'hidden' }}>
         <HistoryProvider>
-        <Sidebar setMode={setMode} editorPage={editorRef}/>
+        <Sidebar setMode={setMode} editorPage={editorRef} setDeleteTrigger={setDeleteTrigger}/>
         <div ref={editorRef} style={{ flexGrow: 1, position: 'relative' }}>
-          <FloorPlanEditor setSelectedItem={setSelectedItem} />
+          <FloorPlanEditor setSelectedItem={setSelectedItem} setDeleteTrigger={setDeleteTrigger} deleteTrigger={deleteTrigger}/>
         </div>
         </HistoryProvider>
       </div>

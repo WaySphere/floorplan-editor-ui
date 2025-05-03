@@ -39,7 +39,7 @@ const FloorDropdown = () => {
     </Dropdown>
 )
 }
-const Sidebar = ({ setMode, editorPage}) => {
+const Sidebar = ({ setMode, editorPage, setDeleteTrigger}) => {
   const {undo, redo} = useHistory();
   const tools = [
     { name: 'select', icon: <Cursor />, label: 'Select' },
@@ -61,7 +61,7 @@ const handleToolSelection = (event, toolName) => {
     } else if (event === 'addText') {
     console.log('Redo');
   } else if (event === 'delete') {
-  console.log('Redo');
+    setDeleteTrigger(true);
 } else if (event === 'undo') {
   console.log('Undo');
   undo();
