@@ -5,7 +5,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-editable";
 import GeoJSONWithSelection from "./GeoJsonWithSelection";
 
-const FloorPlanEditor = () => {
+const FloorPlanEditor = ({setSelectedItem, setDeleteTrigger, deleteTrigger}) => {
   const [floorPlan, setFloorPlan] = useState(null);
   const [selectedFeature, setSelectedFeature] = useState(null);
 
@@ -33,6 +33,8 @@ const FloorPlanEditor = () => {
             setData={setFloorPlan}
             selectedFeature={selectedFeature} 
             setSelectedFeature={setSelectedFeature} 
+            setDeleteTrigger={setDeleteTrigger}
+            deleteTrigger={deleteTrigger}
           />
         </MapContainer>
       )}

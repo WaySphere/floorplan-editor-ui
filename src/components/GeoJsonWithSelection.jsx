@@ -4,7 +4,7 @@ import L from "leaflet";
 import {useHistory} from "../context/HistoryContext";
 
 
-const GeoJSONWithSelection = ({ data, setData, selectedFeature, setSelectedFeature }) => {
+const GeoJSONWithSelection = ({ data, setData, selectedFeature, setSelectedFeature, setDeleteTrigger, deleteTrigger}) => {
   const map = useMap();
   const [layerMap, setLayerMap] = useState(new Map());
   const {initializeState, saveState, undoStack, redoStack, currentState, setCurrentState} = useHistory(); 
@@ -75,7 +75,22 @@ const GeoJSONWithSelection = ({ data, setData, selectedFeature, setSelectedFeatu
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Delete" || e.key === "Backspace") {
-        if (!selectedFeature) return;
+        performDeleteOperation();
+      }
+    };
+  
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [data, selectedFeature, setData, saveState, setSelectedFeature]);
+
+  useEffect( ()=> {
+    if(deleteTrigger && selectedFeature){
+      performDeleteOperation();
+      setDeleteTrigger(false);
+    }
+  })
+  const performDeleteOperation = () => {
+    if (!selectedFeature) return;
   
         const updated = data.features.filter(
           (f) => f.properties.id !== selectedFeature.properties.id
@@ -88,13 +103,7 @@ const GeoJSONWithSelection = ({ data, setData, selectedFeature, setSelectedFeatu
   
         saveState(updated);
         setSelectedFeature(null);
-      }
-    };
-  
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [data, selectedFeature, setData, saveState, setSelectedFeature]);
-
+  }
   return null;
 };
 
