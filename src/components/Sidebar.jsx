@@ -1,19 +1,27 @@
 import { useEffect, useState } from 'react';
 import { Button, Dropdown, OverlayTrigger, Tooltip, ButtonGroup, Alert } from 'react-bootstrap';
 import { Cursor, VectorPen, GeoAlt, Type, Trash, ArrowCounterclockwise, ArrowClockwise } from 'react-bootstrap-icons';
+import { fetchFloors } from '../utils/api';
 import { useHistory } from "../context/HistoryContext";
 
 const FloorDropdown = () => {
   const [allFloors, setAllFloors] = useState([]);
   const [selectedFloor, setSelectedFloor] = useState(null);
+  const orgId = '4'; // Replace with actual orgId
   useEffect(() => {
-    fetch('/mockFloors.json').then((res) => {
-      res.json().then((data) => {
+    const loadFloors = async () => {
+      try {
+        const data = await fetchFloors(orgId);
         console.log('Loaded Floors Data:', data);
-        setAllFloors(data.floors);
-        setSelectedFloor(data.floors && data.floors[0]);
-      });
-    })
+        const extractedFloors = data.map( (d) => d.id);
+        setAllFloors(extractedFloors);
+        setSelectedFloor(extractedFloors && extractedFloors[0]);
+      } catch (err) {
+        // setError('Failed to load floors. Please try again later.');
+      }
+    };
+
+    loadFloors();
   }, []);
   return (
     (allFloors.length === 0) ? <Alert variant='warning'>Floors map not found</Alert> :
