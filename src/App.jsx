@@ -9,6 +9,8 @@ export default function App() {
   const [mode, setMode] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [deleteTrigger, setDeleteTrigger] = useState(false);
+  const [selectedFloor, setSelectedFloor] = useState(null);
+  const [saveStatus, setSaveStatus] = useState(0);
   const editorRef = useRef();
 
   return (
@@ -21,9 +23,9 @@ export default function App() {
       {/* Middle Section */}
       <div style={{ display: 'flex', flexGrow: 1, position: 'relative', overflow: 'hidden' }}>
         <HistoryProvider>
-        <Sidebar setMode={setMode} editorPage={editorRef} setDeleteTrigger={setDeleteTrigger}/>
+        <Sidebar setMode={setMode} editorPage={editorRef} setDeleteTrigger={setDeleteTrigger} selectedFloor={selectedFloor} setSelectedFloor={setSelectedFloor} />
         <div ref={editorRef} style={{ flexGrow: 1, position: 'relative' }}>
-          <FloorPlanEditor setSelectedItem={setSelectedItem} setDeleteTrigger={setDeleteTrigger} deleteTrigger={deleteTrigger}/>
+          <FloorPlanEditor setSelectedItem={setSelectedItem} setDeleteTrigger={setDeleteTrigger} deleteTrigger={deleteTrigger} selectedFloor={selectedFloor} saveStatus={saveStatus} setSaveStatus={setSaveStatus} />
         </div>
         </HistoryProvider>
       </div>
@@ -39,10 +41,7 @@ export default function App() {
         zIndex: 1000
       }}>
         <BottomPanel
-          mode={mode}
-          selectedItem={selectedItem}
-          onSave={() => console.log('Saving...')}
-          onUndo={() => console.log('Undo...')}
+          setSaveStatus={setSaveStatus}
         />
       </div>
     </div>
