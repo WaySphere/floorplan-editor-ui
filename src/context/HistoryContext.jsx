@@ -41,8 +41,13 @@ export const HistoryProvider = ({ children }) => {
   const redoStackPeek = () => {
     return redoStack.length > 0 ? redoStack[redoStack.length - 1] : null;
   }
+  const clearHistory = () => {
+    setUndoStack([]);
+    setRedoStack([]);
+    setCurrentState(null);
+  };
   return (
-    <HistoryContext.Provider value={{ initializeState, saveState, undo, redo, undoStack, redoStack, currentState, setCurrentState }}>
+    <HistoryContext.Provider value={{ initializeState, saveState, undo, redo, undoStack, redoStack, currentState, setCurrentState, clearHistory }}>
       {children}
     </HistoryContext.Provider>
   );
