@@ -13,7 +13,7 @@ export default function LoginPage() {
     // TODO: Replace with your backend API call
     // Example:
     // const res = await fetch("/api/login", { ... });
-    // if (res.ok) { navigate("/"); }
+    // if (res.ok) { navigate("/dashboard"); }
     alert("Login logic goes here!");
   };
 
