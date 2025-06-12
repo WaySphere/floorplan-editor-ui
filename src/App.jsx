@@ -21,7 +21,14 @@ function MainLayout(props) {
       </div>
       <div style={{ display: 'flex', flexGrow: 1, position: 'relative', overflow: 'hidden' }}>
         <HistoryProvider>
-          <Sidebar setMode={setMode} editorPage={editorRef} setDeleteTrigger={setDeleteTrigger} selectedFloor={selectedFloor} setSelectedFloor={setSelectedFloor} />
+          <Sidebar
+            mode={mode}
+            setMode={setMode}
+            editorPage={editorRef}
+            setDeleteTrigger={setDeleteTrigger}
+            selectedFloor={selectedFloor}
+            setSelectedFloor={setSelectedFloor}
+          />
           <div ref={editorRef} style={{ flexGrow: 1, position: 'relative' }}>
             <FloorPlanEditor mode={mode} setMode={setMode} setSelectedItem={setSelectedItem} setDeleteTrigger={setDeleteTrigger} deleteTrigger={deleteTrigger} selectedFloor={selectedFloor} saveStatus={saveStatus} setSaveStatus={setSaveStatus} />
           </div>

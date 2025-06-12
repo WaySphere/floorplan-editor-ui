@@ -47,7 +47,7 @@ const FloorDropdown = ({selectedFloor, setSelectedFloor}) => {
       </Dropdown>
   )
 }
-const Sidebar = ({ setMode, editorPage, setDeleteTrigger, selectedFloor, setSelectedFloor }) => {
+const Sidebar = ({ mode, setMode, editorPage, setDeleteTrigger, selectedFloor, setSelectedFloor }) => {
   const { undo, redo } = useHistory();
   const tools = [
     { name: 'select', icon: <Cursor />, label: 'Select' },
@@ -65,8 +65,10 @@ const Sidebar = ({ setMode, editorPage, setDeleteTrigger, selectedFloor, setSele
       undo();
     } else if (toolName === 'redo') {
       redo();
+    } else if (toolName === 'addPOI') {
+      setMode(mode === 'addPOI' ? null : 'addPOI'); // Toggle addPOI mode
     } else {
-      setMode(toolName); // This will activate addPOI mode when Add POI is clicked
+      setMode(toolName);
     }
   };
 
@@ -82,7 +84,8 @@ const Sidebar = ({ setMode, editorPage, setDeleteTrigger, selectedFloor, setSele
         {tools.map((tool) => (
           <OverlayTrigger key={tool.name} placement="right" overlay={<Tooltip>{tool.label}</Tooltip>}>
             <Button
-              variant="light"
+              variant={tool.name === 'addPOI' && mode === 'addPOI' ? "primary" : "light"}
+              active={tool.name === 'addPOI' && mode === 'addPOI'}
               className="mb-2 d-flex align-items-center justify-content-center"
               style={{ width: '40px', height: '40px' }}
               onClick={() => handleToolSelection(tool.name)}
