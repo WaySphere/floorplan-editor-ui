@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Marker, Popup, MapContainer } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -8,11 +8,14 @@ import { fetchFloorPlan, updateFeature } from "../utils/api";
 import { useHistory } from "../context/HistoryContext";
 import { Modal, Button, Form } from "react-bootstrap";
 
-const FloorPlanEditor = ({mode, setMode, setSelectedItem, setDeleteTrigger, deleteTrigger, selectedFloor, saveStatus, setSaveStatus}) => {
+const FloorPlanEditor = ({
+  mode, setMode, setSelectedItem, setDeleteTrigger, deleteTrigger,
+  selectedFloor, saveStatus, setSaveStatus
+}) => {
   const [floorPlan, setFloorPlan] = useState(null);
   const [originalFloorPlan, setOriginalFloorPlan] = useState(null);
   const [selectedFeature, setSelectedFeature] = useState(null);
-  const {clearHistory} = useHistory();
+  const { clearHistory } = useHistory();
   const orgId = '4'; // Replace with actual orgId
   const [showPoiModal, setShowPoiModal] = useState(false);
   const [pois, setPois] = useState([]);
@@ -26,44 +29,70 @@ const FloorPlanEditor = ({mode, setMode, setSelectedItem, setDeleteTrigger, dele
     exit_node: false,
     connected_node_id: ""
   });
+  const [pathNodes, setPathNodes] = useState([]);
+  let pathNodeId = useRef(11111);
 
-  // useEffect(() => {
-  //   fetch("/mockFloorPlan.json")
-  //     .then((res) => res.json())
-  //     .then((data) => setFloorPlan(data))
-  //     .catch((err) => console.error("Failed to load GeoJSON", err));
-  // }, []);
+  const pathIcon = new L.Icon({
+    iconUrl: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/icons/record-circle.svg",
+    iconSize: [20, 20],
+    iconAnchor: [10, 10],
+    className: "path-node-icon"
+  });
 
+  // Fetch floor plan, POIs, and path nodes when floor changes
   useEffect(() => {
-    if (!selectedFloor) return; // Do nothing if no floor is selected
+    if (!selectedFloor) return;
 
+    // Fetch floor plan
     const loadFloorPlan = async () => {
       try {
-        const data = await fetchFloorPlan(orgId, selectedFloor); // Fetch floor plan from backend
+        const data = await fetchFloorPlan(orgId, selectedFloor);
         setFloorPlan(data);
-        setOriginalFloorPlan(data); // Store the original floor plan
+        setOriginalFloorPlan(data);
       } catch (err) {
         console.error("Failed to load GeoJSON", err);
       }
     };
 
+    // Fetch POIs
+    const loadPois = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:5767/navigation-nodes/floor/poi?floor=${encodeURIComponent(selectedFloor)}`
+        );
+        const data = await res.json();
+        setPois(data);
+      } catch (err) {
+        setPois([]);
+      }
+    };
+
+    // Fetch Path Nodes
+    const loadPathNodes = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:5767/navigation-nodes/floor/path?floor=${encodeURIComponent(selectedFloor)}`
+        );
+        const data = await res.json();
+        setPathNodes(data);
+      } catch (err) {
+        setPathNodes([]);
+      }
+    };
+
     loadFloorPlan();
-  }, [selectedFloor]); 
+    loadPois();
+    loadPathNodes();
+  }, [selectedFloor]);
 
   useEffect(() => {
-    if(saveStatus === 1) {
-      // Save the current state of the floor plan
-      // need to call the api to save the floor plan
-      updateFeature(orgId, selectedFloor, floorPlan)
-      console.log("Saved Floor Plan:", floorPlan);
+    if (saveStatus === 1) {
+      updateFeature(orgId, selectedFloor, floorPlan);
       setOriginalFloorPlan(floorPlan);
       setSelectedFeature(null);
       alert("Floor Plan saved successfully");
-    }
-    else if(saveStatus === -1) {
-      // Reset the floor plan to its original state
+    } else if (saveStatus === -1) {
       setFloorPlan(originalFloorPlan);
-      console.log("Reset Floor Plan:", floorPlan);
     }
     setSaveStatus(0);
     clearHistory();
@@ -78,14 +107,14 @@ const FloorPlanEditor = ({mode, setMode, setSelectedItem, setDeleteTrigger, dele
           style={{ height: "500px", width: "100%", backgroundColor: "#f5f5f5" }}
           editable={true}
           whenCreated={(map) => {
-            map.editTools = new L.Editable(map); // ✅ Enable Editable Mode
+            map.editTools = new L.Editable(map);
           }}
         >
-          <GeoJSONWithSelection 
-            data={floorPlan} 
+          <GeoJSONWithSelection
+            data={floorPlan}
             setData={setFloorPlan}
-            selectedFeature={selectedFeature} 
-            setSelectedFeature={setSelectedFeature} 
+            selectedFeature={selectedFeature}
+            setSelectedFeature={setSelectedFeature}
             setDeleteTrigger={setDeleteTrigger}
             deleteTrigger={deleteTrigger}
             addPoiMode={mode === "addPOI"}
@@ -101,6 +130,33 @@ const FloorPlanEditor = ({mode, setMode, setSelectedItem, setDeleteTrigger, dele
                 connected_node_id: ""
               });
               setShowPoiModal(true);
+            }}
+            drawPathMode={mode === "drawPath"}
+            onPathMapClick={async (latlng) => {
+              const newNode = {
+                featureId: pathNodeId.current++,
+                floorId: selectedFloor,
+                longitude: latlng.lng,
+                latitude: latlng.lat,
+                nodeType: "PATH",
+                exitNode: false,
+                connectedNodeId: null,
+                label: ""
+              };
+              try {
+                const res = await fetch("http://localhost:5767/navigation-nodes", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(newNode)
+                });
+                if (!res.ok) {
+                  alert("Failed to save path node");
+                  return;
+                }
+                setPathNodes((prev) => [...prev, newNode]);
+              } catch (err) {
+                alert("Failed to save path node");
+              }
             }}
           />
           {pois.map((poi) => (
@@ -120,13 +176,24 @@ const FloorPlanEditor = ({mode, setMode, setSelectedItem, setDeleteTrigger, dele
               </Popup>
             </Marker>
           ))}
+          {pathNodes.map((node) => (
+            <Marker
+              key={node.featureId}
+              position={[node.latitude, node.longitude]}
+              icon={pathIcon}
+            >
+              <Popup>
+                Path Node<br />
+                ID: {node.featureId}
+              </Popup>
+            </Marker>
+          ))}
         </MapContainer>
       )}
       <Modal show={showPoiModal} onHide={() => setShowPoiModal(false)} centered>
         <Form
           onSubmit={async (e) => {
             e.preventDefault();
-            // Prepare payload for backend
             const payload = {
               featureId: poiData.node_id,
               floorId: poiData.floor_id,
@@ -148,8 +215,6 @@ const FloorPlanEditor = ({mode, setMode, setSelectedItem, setDeleteTrigger, dele
                 alert("Failed to save POI");
                 return;
               }
-              // Optionally get the created POI from response
-              // const savedPoi = await res.json();
               setPois([...pois, { ...payload }]);
               setShowPoiModal(false);
             } catch (err) {

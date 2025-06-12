@@ -67,6 +67,8 @@ const Sidebar = ({ mode, setMode, editorPage, setDeleteTrigger, selectedFloor, s
       redo();
     } else if (toolName === 'addPOI') {
       setMode(mode === 'addPOI' ? null : 'addPOI'); // Toggle addPOI mode
+    } else if (toolName === 'drawPath') {
+      setMode(mode === 'drawPath' ? null : 'drawPath'); // Toggle drawPath mode
     } else {
       setMode(toolName);
     }
@@ -84,8 +86,16 @@ const Sidebar = ({ mode, setMode, editorPage, setDeleteTrigger, selectedFloor, s
         {tools.map((tool) => (
           <OverlayTrigger key={tool.name} placement="right" overlay={<Tooltip>{tool.label}</Tooltip>}>
             <Button
-              variant={tool.name === 'addPOI' && mode === 'addPOI' ? "primary" : "light"}
-              active={tool.name === 'addPOI' && mode === 'addPOI'}
+              variant={
+                (tool.name === 'addPOI' && mode === 'addPOI') ||
+                (tool.name === 'drawPath' && mode === 'drawPath')
+                  ? "primary"
+                  : "light"
+              }
+              active={
+                (tool.name === 'addPOI' && mode === 'addPOI') ||
+                (tool.name === 'drawPath' && mode === 'drawPath')
+              }
               className="mb-2 d-flex align-items-center justify-content-center"
               style={{ width: '40px', height: '40px' }}
               onClick={() => handleToolSelection(tool.name)}
