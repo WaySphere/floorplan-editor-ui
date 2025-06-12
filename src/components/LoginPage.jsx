@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function LoginPage() {
+export default function LoginPage({setOrganizationId}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -10,10 +10,20 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-    // TODO: Replace with your backend API call
-    // Example:
-    // const res = await fetch("/api/login", { ... });
-    // if (res.ok) { navigate("/dashboard"); }
+    const res = await fetch("http://localhost:5767/admin/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: email.trim(),
+        password: password.trim()
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setOrganizationId(data.organizationId);
+      navigate("/dashboard"); }
     alert("Login logic goes here!");
   };
 

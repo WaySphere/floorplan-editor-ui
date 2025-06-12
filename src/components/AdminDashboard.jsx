@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaUpload, FaEdit, FaUserCircle } from "react-icons/fa";
 import { Modal, Button, Form, Row, Col, Alert, Container, Card } from "react-bootstrap";
 
-export default function AdminDashboard() {
+export default function AdminDashboard({setOrganizationId, organizationId}) {
   const navigate = useNavigate();
   const [showUpload, setShowUpload] = useState(false);
   const [floorId, setFloorId] = useState("");
@@ -22,7 +22,7 @@ export default function AdminDashboard() {
     setFile(e.target.files[0]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     if (!floorId.trim()) {
@@ -36,6 +36,79 @@ export default function AdminDashboard() {
     if (!file) {
       setError("Please select a file.");
       return;
+    }
+    if( organizationId === null) {
+      setError("Please login first.");
+      return;
+    }
+    if (uploadType === "dxf" ){
+      if(!file.name.endsWith(".dxf")) {
+        setError("Please upload a valid DXF file.");
+        return;
+      }
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("floorDesc", floorDesc);
+
+        // Encode floorId for URL safety
+        const encodedFloorId = encodeURIComponent(floorId.trim());
+        const url = `http://localhost:5767/admin/upload/dxf/${organizationId}/${encodedFloorId}`;
+
+        const res = await fetch(url, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!res.ok) {
+          setError("Upload failed. Please try again.");
+          return;
+        }
+        alert("DXF file uploaded successfully!");
+      } catch (err) {
+        setError("Upload failed. Please try again.");
+        return;
+      }
+    }
+    if (uploadType === "geojson") {
+      if(!file.name.endsWith(".json") && !file.name.endsWith(".geojson")) {
+        setError("Please upload a valid GeoJSON file.");
+        return;
+      }
+      try {
+        // Read the file as text and parse as JSON
+        const text = await file.text();
+        let geojson;
+        try {
+          geojson = JSON.parse(text);
+        } catch (err) {
+          setError("Invalid GeoJSON file.");
+          return;
+        }
+
+        const encodedFloorId = encodeURIComponent(floorId.trim());
+        const url = `http://localhost:5767/floor-features/${organizationId}/${encodedFloorId}`;
+
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            floorDesc,
+            geojson
+          }),
+        });
+
+        if (!res.ok) {
+          setError("Upload failed. Please try again.");
+          return;
+        }
+        alert("GeoJSON uploaded successfully!");
+      } catch (err) {
+        setError("Upload failed. Please try again.");
+        return;
+      }
     }
     // TODO: Implement actual upload logic here (API call)
     alert(`Uploading Floor: ${floorId}, Desc: ${floorDesc}, Type: ${uploadType}, File: ${file.name}`);
@@ -114,7 +187,7 @@ export default function AdminDashboard() {
                   required
                 />
               </Form.Group>
-              <Form.Group className="mb-3" controlId="floorDesc">
+              {/* <Form.Group className="mb-3" controlId="floorDesc">
                 <Form.Label>
                   Floor Description <span className="text-muted">(max 20 chars)</span>
                 </Form.Label>
@@ -126,7 +199,7 @@ export default function AdminDashboard() {
                   onChange={e => setFloorDesc(e.target.value)}
                   required
                 />
-              </Form.Group>
+              </Form.Group> */}
               <Form.Group className="mb-3">
                 <Form.Label>Upload Type</Form.Label>
                 <Row>

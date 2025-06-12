@@ -48,13 +48,14 @@ export default function App() {
   const [deleteTrigger, setDeleteTrigger] = useState(false);
   const [selectedFloor, setSelectedFloor] = useState(null);
   const [saveStatus, setSaveStatus] = useState(0);
+  const [organizationId, setOrganizationId] = useState(null);
   const editorRef = useRef();
 
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<AdminDashboard />} />
+        <Route path="/login" element={<LoginPage setOrganizationId={setOrganizationId}/>} />
+        <Route path="/dashboard" element={<AdminDashboard organizationId={organizationId} setOrganizationId={setOrganizationId} />} />
         <Route
           path="/editor"
           element={
