@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { useMap } from "react-leaflet";
+import { useMap, useMapEvent } from "react-leaflet";
 import L from "leaflet";
 import {useHistory} from "../context/HistoryContext";
 
 
-const GeoJSONWithSelection = ({ data, setData, selectedFeature, setSelectedFeature, setDeleteTrigger, deleteTrigger}) => {
+const GeoJSONWithSelection = ({ data, setData, selectedFeature, setSelectedFeature, setDeleteTrigger, deleteTrigger, addPoiMode, onPoiMapClick }) => {
+  useMapEvent("click", (e) => {
+    if (addPoiMode && onPoiMapClick) {
+      onPoiMapClick(e.latlng);
+    }
+  });
   const map = useMap();
   const [layerMap, setLayerMap] = useState(new Map());
   const {initializeState, saveState, undoStack, redoStack, currentState, setCurrentState} = useHistory(); 
@@ -20,7 +25,9 @@ const GeoJSONWithSelection = ({ data, setData, selectedFeature, setSelectedFeatu
       }),
       onEachFeature: (feature, layer) => {
         layer.on("click", () => {
-          setSelectedFeature(feature); // Store selected feature
+          if (!addPoiMode) { // <-- Only select if not in Add POI mode
+            setSelectedFeature(feature);
+          }
         });
         layerMap.set(feature.properties.id, layer);
       },
@@ -31,7 +38,7 @@ const GeoJSONWithSelection = ({ data, setData, selectedFeature, setSelectedFeatu
     return () => {
       geoJsonLayer.remove();
     };
-  }, [data, map, selectedFeature, setSelectedFeature, setData]);
+  }, [data, map, selectedFeature, setSelectedFeature, setData, addPoiMode]);
 
   useEffect(() => {
     if (!selectedFeature || !layerMap.has(selectedFeature.properties.id)) return;

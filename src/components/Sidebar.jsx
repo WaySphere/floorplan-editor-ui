@@ -58,29 +58,23 @@ const Sidebar = ({ setMode, editorPage, setDeleteTrigger, selectedFloor, setSele
     { name: 'redo', icon: <ArrowClockwise />, label: 'Redo' }
   ];
 
-  const handleToolSelection = (event, toolName) => {
-    if (event === 'select') {
-      this.prototype.handleSelect();
-    } else if (event === 'drawPath') {
-      console.log('Undo');
-    } else if (event === 'addPOI') {
-      console.log('Redo');
-    } else if (event === 'delete') {
+  const handleToolSelection = (toolName) => {
+    if (toolName === 'delete') {
       setDeleteTrigger(true);
-    } else if (event === 'undo') {
-      console.log('Undo');
+    } else if (toolName === 'undo') {
       undo();
-    } else if (event === 'redo') {
-      console.log('Redo');
+    } else if (toolName === 'redo') {
       redo();
     } else {
-      setMode(toolName);
+      setMode(toolName); // This will activate addPOI mode when Add POI is clicked
     }
-  }
+  };
 
   return (
     <>
-      <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', zIndex: 1000 }}><FloorDropdown setSelectedFloor={setSelectedFloor} selectedFloor={selectedFloor} /></div>
+      <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', zIndex: 1000 }}>
+        <FloorDropdown setSelectedFloor={setSelectedFloor} selectedFloor={selectedFloor} />
+      </div>
       <div style={{
         width: '60px', backgroundColor: '#f8f9fa', padding: '10px', position: 'relative', display: 'flex',
         flexDirection: 'column', alignItems: 'center', boxShadow: '2px 0 5px rgba(0, 0, 0, 0.1)'
@@ -91,7 +85,7 @@ const Sidebar = ({ setMode, editorPage, setDeleteTrigger, selectedFloor, setSele
               variant="light"
               className="mb-2 d-flex align-items-center justify-content-center"
               style={{ width: '40px', height: '40px' }}
-              onClick={handleToolSelection.bind(null, tool.name)}
+              onClick={() => handleToolSelection(tool.name)}
             >
               {tool.icon}
             </Button>
