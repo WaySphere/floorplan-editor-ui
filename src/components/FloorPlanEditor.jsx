@@ -181,7 +181,7 @@ const FloorPlanEditor = ({
             >
               <Popup>
                 Path Node<br />
-                ID: {node.featureId}
+                ID: {node.nodeId || node.featureId}
               </Popup>
             </Marker>
           ))}
