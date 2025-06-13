@@ -211,8 +211,16 @@ const FloorPlanEditor = ({
                 alert("Failed to save POI");
                 return;
               }
-              const savedPoi = await res.json(); // Get nodeId/featureId from backend
-              setPois([...pois, savedPoi]);
+              const savedPoi = await res.json(); // This does NOT have lat/lng
+              // Merge backend response with local lat/lng
+              setPois([
+                ...pois,
+                {
+                  ...savedPoi,
+                  latitude: poiData.latitude,
+                  longitude: poiData.longitude
+                }
+              ]);
               setShowPoiModal(false);
             } catch (err) {
               alert("Failed to save POI");
