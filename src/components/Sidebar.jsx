@@ -4,14 +4,13 @@ import { Cursor, VectorPen, GeoAlt, Type, Trash, ArrowCounterclockwise, ArrowClo
 import { fetchFloors } from '../utils/api';
 import { useHistory } from "../context/HistoryContext";
 
-const FloorDropdown = ({selectedFloor, setSelectedFloor}) => {
+const FloorDropdown = ({organizationId, selectedFloor, setSelectedFloor}) => {
   const [allFloors, setAllFloors] = useState([]);
   
-  const orgId = '4'; // Replace with actual orgId
   useEffect(() => {
     const loadFloors = async () => {
       try {
-        const data = await fetchFloors(orgId);
+        const data = await fetchFloors(organizationId);
         console.log('Loaded Floors Data:', data);
         const extractedFloors = data.map( (d) => d.id);
         setAllFloors(extractedFloors);
@@ -47,7 +46,7 @@ const FloorDropdown = ({selectedFloor, setSelectedFloor}) => {
       </Dropdown>
   )
 }
-const Sidebar = ({ mode, setMode, editorPage, setDeleteTrigger, selectedFloor, setSelectedFloor }) => {
+const Sidebar = ({ organizationId, mode, setMode, editorPage, setDeleteTrigger, selectedFloor, setSelectedFloor }) => {
   const { undo, redo } = useHistory();
   const tools = [
     { name: 'select', icon: <Cursor />, label: 'Select' },
@@ -77,7 +76,7 @@ const Sidebar = ({ mode, setMode, editorPage, setDeleteTrigger, selectedFloor, s
   return (
     <>
       <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', zIndex: 1000 }}>
-        <FloorDropdown setSelectedFloor={setSelectedFloor} selectedFloor={selectedFloor} />
+        <FloorDropdown organizationId={organizationId} setSelectedFloor={setSelectedFloor} selectedFloor={selectedFloor} />
       </div>
       <div style={{
         width: '60px', backgroundColor: '#f8f9fa', padding: '10px', position: 'relative', display: 'flex',

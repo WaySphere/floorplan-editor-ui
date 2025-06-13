@@ -10,7 +10,7 @@ import AdminDashboard from "./components/AdminDashboard"; // Create this compone
 
 function MainLayout(props) {
   const {
-    mode, setMode, selectedItem, setSelectedItem, deleteTrigger, setDeleteTrigger,
+    organizationId, mode, setMode, selectedItem, setSelectedItem, deleteTrigger, setDeleteTrigger,
     selectedFloor, setSelectedFloor, saveStatus, setSaveStatus, editorRef
   } = props;
 
@@ -22,6 +22,7 @@ function MainLayout(props) {
       <div style={{ display: 'flex', flexGrow: 1, position: 'relative', overflow: 'hidden' }}>
         <HistoryProvider>
           <Sidebar
+            organizationId={organizationId}
             mode={mode}
             setMode={setMode}
             editorPage={editorRef}
@@ -30,7 +31,7 @@ function MainLayout(props) {
             setSelectedFloor={setSelectedFloor}
           />
           <div ref={editorRef} style={{ flexGrow: 1, position: 'relative' }}>
-            <FloorPlanEditor mode={mode} setMode={setMode} setSelectedItem={setSelectedItem} setDeleteTrigger={setDeleteTrigger} deleteTrigger={deleteTrigger} selectedFloor={selectedFloor} saveStatus={saveStatus} setSaveStatus={setSaveStatus} />
+            <FloorPlanEditor organizationId={organizationId} mode={mode} setMode={setMode} setSelectedItem={setSelectedItem} setDeleteTrigger={setDeleteTrigger} deleteTrigger={deleteTrigger} selectedFloor={selectedFloor} saveStatus={saveStatus} setSaveStatus={setSaveStatus} />
           </div>
         </HistoryProvider>
       </div>
@@ -67,6 +68,7 @@ export default function App() {
           path="/editor"
           element={
             <MainLayout
+              organizationId={organizationId}
               mode={mode}
               setMode={setMode}
               selectedItem={selectedItem}

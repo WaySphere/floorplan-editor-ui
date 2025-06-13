@@ -9,18 +9,16 @@ import { useHistory } from "../context/HistoryContext";
 import { Modal, Button, Form } from "react-bootstrap";
 
 const FloorPlanEditor = ({
-  mode, setMode, setSelectedItem, setDeleteTrigger, deleteTrigger,
+  organizationId, mode, setMode, setSelectedItem, setDeleteTrigger, deleteTrigger,
   selectedFloor, saveStatus, setSaveStatus
 }) => {
   const [floorPlan, setFloorPlan] = useState(null);
   const [originalFloorPlan, setOriginalFloorPlan] = useState(null);
   const [selectedFeature, setSelectedFeature] = useState(null);
   const { clearHistory } = useHistory();
-  const orgId = '4'; // Replace with actual orgId
   const [showPoiModal, setShowPoiModal] = useState(false);
   const [pois, setPois] = useState([]);
   const [poiData, setPoiData] = useState({
-    node_id: "",
     label: "",
     latitude: null,
     longitude: null,
@@ -46,7 +44,7 @@ const FloorPlanEditor = ({
     // Fetch floor plan
     const loadFloorPlan = async () => {
       try {
-        const data = await fetchFloorPlan(orgId, selectedFloor);
+        const data = await fetchFloorPlan(organizationId, selectedFloor);
         setFloorPlan(data);
         setOriginalFloorPlan(data);
       } catch (err) {
@@ -87,7 +85,7 @@ const FloorPlanEditor = ({
 
   useEffect(() => {
     if (saveStatus === 1) {
-      updateFeature(orgId, selectedFloor, floorPlan);
+      updateFeature(organizationId, selectedFloor, floorPlan);
       setOriginalFloorPlan(floorPlan);
       setSelectedFeature(null);
       alert("Floor Plan saved successfully");
@@ -104,7 +102,7 @@ const FloorPlanEditor = ({
         <MapContainer
           bounds={L.geoJSON(floorPlan).getBounds()}
           crs={L.CRS.Simple}
-          style={{ height: "500px", width: "100%", backgroundColor: "#f5f5f5" }}
+          style={{ height: "90vh", width: "100%", backgroundColor: "#f5f5f5" }}
           editable={true}
           whenCreated={(map) => {
             map.editTools = new L.Editable(map);
@@ -120,7 +118,6 @@ const FloorPlanEditor = ({
             addPoiMode={mode === "addPOI"}
             onPoiMapClick={(latlng) => {
               setPoiData({
-                node_id: "",
                 label: "",
                 latitude: latlng.lat,
                 longitude: latlng.lng,
@@ -161,7 +158,7 @@ const FloorPlanEditor = ({
           />
           {pois.map((poi) => (
             <Marker
-              key={poi.featureId}
+              key={poi.featureId || poi.nodeId}
               position={[poi.latitude, poi.longitude]}
               icon={new L.Icon({
                 iconUrl: "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/icons/geo-alt-fill.svg",
@@ -171,7 +168,7 @@ const FloorPlanEditor = ({
             >
               <Popup>
                 <strong>{poi.label}</strong><br />
-                Node ID: {poi.featureId}<br />
+                Node ID: {poi.featureId || poi.nodeId}<br />
                 Exit: {poi.exitNode ? "Yes" : "No"}
               </Popup>
             </Marker>
@@ -195,7 +192,6 @@ const FloorPlanEditor = ({
           onSubmit={async (e) => {
             e.preventDefault();
             const payload = {
-              featureId: poiData.node_id,
               floorId: poiData.floor_id,
               longitude: poiData.longitude,
               latitude: poiData.latitude,
@@ -215,7 +211,8 @@ const FloorPlanEditor = ({
                 alert("Failed to save POI");
                 return;
               }
-              setPois([...pois, { ...payload }]);
+              const savedPoi = await res.json(); // Get nodeId/featureId from backend
+              setPois([...pois, savedPoi]);
               setShowPoiModal(false);
             } catch (err) {
               alert("Failed to save POI");
@@ -226,14 +223,7 @@ const FloorPlanEditor = ({
             <Modal.Title>Add POI</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Form.Group className="mb-2">
-              <Form.Label>Node ID</Form.Label>
-              <Form.Control
-                value={poiData.node_id}
-                onChange={e => setPoiData({ ...poiData, node_id: e.target.value })}
-                required
-              />
-            </Form.Group>
+            {/* Node ID input removed */}
             <Form.Group className="mb-2">
               <Form.Label>Label</Form.Label>
               <Form.Control

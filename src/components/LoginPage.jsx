@@ -24,7 +24,6 @@ export default function LoginPage({setOrganizationId}) {
       const data = await res.json();
       setOrganizationId(data.organizationId);
       navigate("/dashboard"); }
-    alert("Login logic goes here!");
   };
 
   return (

@@ -64,12 +64,9 @@ const GeoJSONWithSelection = ({
       setSelectedFeature(updatedFeature);
 
       // Update the data prop with the modified feature
-      setData((prevData) => ({
-        ...prevData,
-        features: prevData.features.map((feature) =>
-          feature.properties.id === updatedFeature.properties.id ? updatedFeature : feature
-        ),
-      }));
+      setData({
+        type: "FeatureCollection",
+        features: newData});
       saveState(newData);
     });
   

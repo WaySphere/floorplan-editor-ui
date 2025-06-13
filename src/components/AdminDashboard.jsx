@@ -7,10 +7,10 @@ export default function AdminDashboard({setOrganizationId, organizationId}) {
   const navigate = useNavigate();
   const [showUpload, setShowUpload] = useState(false);
   const [floorId, setFloorId] = useState("");
-  const [floorDesc, setFloorDesc] = useState("");
   const [file, setFile] = useState(null);
   const [error, setError] = useState("");
   const [uploadType, setUploadType] = useState("dxf"); // default to dxf
+  const [level, setLevel] = useState("");
 
   const handleUpload = () => setShowUpload(true);
 
@@ -29,8 +29,8 @@ export default function AdminDashboard({setOrganizationId, organizationId}) {
       setError("Floor ID is required.");
       return;
     }
-    if (!floorDesc.trim() || floorDesc.length > 20) {
-      setError("Floor Description is required (max 20 chars).");
+    if (!level.trim()) {
+      setError("Level is required.");
       return;
     }
     if (!file) {
@@ -41,6 +41,23 @@ export default function AdminDashboard({setOrganizationId, organizationId}) {
       setError("Please login first.");
       return;
     }
+    const params = new URLSearchParams({
+      floorId: floorId.trim(),
+      orgId: organizationId,
+      level: level.trim()
+    }).toString();
+    try {
+      const floorRes = await fetch(`http://localhost:5767/floors?${params}`, {
+        method: "POST"
+      });
+      if (!floorRes.ok) {
+        setError("Failed to create floor. Please check floor ID and level.");
+        return;
+      }
+    } catch (err) {
+      setError("Failed to create floor. Please try again.");
+      return;
+    }
     if (uploadType === "dxf" ){
       if(!file.name.endsWith(".dxf")) {
         setError("Please upload a valid DXF file.");
@@ -49,7 +66,6 @@ export default function AdminDashboard({setOrganizationId, organizationId}) {
       try {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("floorDesc", floorDesc);
 
         // Encode floorId for URL safety
         const encodedFloorId = encodeURIComponent(floorId.trim());
@@ -70,7 +86,7 @@ export default function AdminDashboard({setOrganizationId, organizationId}) {
         return;
       }
     }
-    if (uploadType === "geojson") {
+    else if (uploadType === "geojson") {
       if(!file.name.endsWith(".json") && !file.name.endsWith(".geojson")) {
         setError("Please upload a valid GeoJSON file.");
         return;
@@ -94,10 +110,7 @@ export default function AdminDashboard({setOrganizationId, organizationId}) {
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({
-            floorDesc,
-            geojson
-          }),
+          body: JSON.stringify(geojson),
         });
 
         if (!res.ok) {
@@ -111,10 +124,9 @@ export default function AdminDashboard({setOrganizationId, organizationId}) {
       }
     }
     // TODO: Implement actual upload logic here (API call)
-    alert(`Uploading Floor: ${floorId}, Desc: ${floorDesc}, Type: ${uploadType}, File: ${file.name}`);
+    alert(`Uploading Floor: ${floorId}, Type: ${uploadType}, File: ${file.name}`);
     setShowUpload(false);
     setFloorId("");
-    setFloorDesc("");
     setFile(null);
     setUploadType("dxf");
   };
@@ -200,6 +212,16 @@ export default function AdminDashboard({setOrganizationId, organizationId}) {
                   required
                 />
               </Form.Group> */}
+              <Form.Group className="mb-3" controlId="level">
+                <Form.Label>Level</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter Level"
+                  value={level}
+                  onChange={e => setLevel(e.target.value)}
+                  required
+                />
+              </Form.Group>
               <Form.Group className="mb-3">
                 <Form.Label>Upload Type</Form.Label>
                 <Row>
@@ -223,7 +245,7 @@ export default function AdminDashboard({setOrganizationId, organizationId}) {
                       onChange={() => setUploadType("geojson")}
                     />
                   </Col>
-                  <Col>
+                  {/* <Col>
                     <Form.Check
                       type="radio"
                       label="Image"
@@ -233,7 +255,7 @@ export default function AdminDashboard({setOrganizationId, organizationId}) {
                       onChange={() => setUploadType("image")}
                       disabled // <-- disables the Image option
                     />
-                  </Col>
+                  </Col> */}
                 </Row>
               </Form.Group>
               <Form.Group className="mb-3" controlId="file">
